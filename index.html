@@ -1,53 +1,130 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <title>Thêm Prefix & Suffix</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Thêm Prefix & Suffix</title>
+    <script src="https://cdn.tailwindcss.com"></script>
 </head>
-<body>
-  <h2>Thêm tiền tố (prefix) và hậu tố (suffix) vào từng dòng</h2>
 
-  <label>Chọn file .txt:</label><br>
-  <input type="file" id="fileInput"><br><br>
+<body class="bg-gray-100 min-h-screen">
 
-  <label>Tiền tố (Prefix):</label><br>
-  <input type="text" id="prefix" value="facebook.com/"><br><br>
+    <div class="flex justify-center items-center">
+        <div class="bg-white p-4 rounded-lg shadow-xl mt-6 w-full max-w-lg flex flex-col gap-4">
+            <h3 class="text-2xl font-bold text-gray-800 text-center">ADD TEXT IN LINE</h2>
 
-  <label>Hậu tố (Suffix):</label><br>
-  <input type="text" id="suffix" value=""><br><br>
+            <div class="flex flex-col">
+                <label for="fileInput" class="text-lg text-gray-600 mb-2">Chọn file .txt:</label>
+                <input type="file" id="fileInput" accept=".txt" onchange="previewFile()"
+                    class="p-2 border border-gray-300 rounded-lg bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500">
+            </div>
 
-  <button onclick="processFile()">Tạo file kết quả</button>
+            <div class="flex flex-col">
+                <label for="prefix" class="text-lg text-gray-600 mb-2">Tiền tố (Prefix):</label>
+                <input type="text" id="prefix" value="facebook.com/" oninput="updatePreview()"
+                    class="p-2 border border-gray-300 rounded-lg bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500">
+            </div>
 
-  <script>
-    function processFile() {
-      const file = document.getElementById('fileInput').files[0];
-      const prefix = document.getElementById('prefix').value;
-      const suffix = document.getElementById('suffix').value;
+            <div class="flex flex-col">
+                <label for="suffix" class="text-lg text-gray-600 mb-2">Hậu tố (Suffix):</label>
+                <input type="text" id="suffix" value="" oninput="updatePreview()"
+                    class="p-2 border border-gray-300 rounded-lg bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500">
+            </div>
 
-      if (!file) {
-        alert("Hãy chọn file .txt trước.");
-        return;
-      }
+            <div class="flex flex-col">
+                <label for="resultFileName" class="text-lg text-gray-600 mb-2">Tên file kết quả:</label>
+                <input type="text" id="resultFileName" value="output"
+                    class="p-2 border border-gray-300 rounded-lg bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500">
+            </div>
 
-      const reader = new FileReader();
-      reader.onload = function(event) {
-        const lines = event.target.result.split('\n');
-        const modifiedLines = lines.map(line => {
-          const trimmed = line.trim();
-          return trimmed ? `${prefix}${trimmed}${suffix}` : '';
-        });
-        const result = modifiedLines.join('\n');
+            <button onclick="processFile()"
+                class="w-full p-4 bg-green-500 text-white text-xl rounded-lg hover:bg-green-600 active:bg-green-700 focus:outline-none focus:ring-2 focus:ring-green-500">
+                Tạo file kết quả
+            </button>
 
-        // Tạo file mới để tải xuống
-        const blob = new Blob([result], { type: 'text/plain' });
-        const url = URL.createObjectURL(blob);
-        const link = document.createElement("a");
-        link.href = url;
-        link.download = "output.txt";
-        link.click();
-      };
-      reader.readAsText(file);
-    }
-  </script>
+            <div class="w-full h-60 border border-gray-300 rounded-lg p-4 bg-gray-50 overflow-y-auto mt-6">
+                <pre id="filePreview" class="text-gray-500">No file selected</pre>
+            </div>
+        </div>
+    </div>
+
+    <div class="text-center text-sm text-gray-600 mt-4">
+        <p>&copy; 2025 Lương Gia</p>
+    </div>
+
+    <script>
+        let fileContent = "";
+
+        function previewFile() {
+            const file = document.getElementById('fileInput').files[0];
+            const previewContainer = document.getElementById('filePreview');
+
+            if (!file) {
+                previewContainer.textContent = "No file selected";
+                return;
+            }
+
+            const reader = new FileReader();
+            reader.onload = function (event) {
+                fileContent = event.target.result;
+                updatePreview(); // Update preview with file content
+            };
+            reader.readAsText(file);
+        }
+
+        function updatePreview() {
+            const prefix = document.getElementById('prefix').value;
+            const suffix = document.getElementById('suffix').value;
+
+            if (!fileContent) {
+                return;
+            }
+
+            const lines = fileContent.split('\n');
+            const modifiedLines = lines.map(line => {
+                const trimmed = line.trim();
+                return trimmed ? `${prefix}${trimmed}${suffix}` : '';
+            });
+            const result = modifiedLines.join('\n');
+
+            document.getElementById('filePreview').textContent = result;
+        }
+
+        function processFile() {
+            const file = document.getElementById('fileInput').files[0];
+            const prefix = document.getElementById('prefix').value;
+            const suffix = document.getElementById('suffix').value;
+            let resultFileName = document.getElementById('resultFileName').value.trim();
+
+            if (!resultFileName.endsWith('.txt')) {
+                resultFileName += '.txt';
+            }
+
+            if (!file) {
+                alert("Hãy chọn file .txt trước.");
+                return;
+            }
+
+            const reader = new FileReader();
+            reader.onload = function (event) {
+                const lines = event.target.result.split('\n');
+                const modifiedLines = lines.map(line => {
+                    const trimmed = line.trim();
+                    return trimmed ? `${prefix}${trimmed}${suffix}` : '';
+                });
+                const result = modifiedLines.join('\n');
+
+                // Tạo file mới để tải xuống
+                const blob = new Blob([result], { type: 'text/plain' });
+                const url = URL.createObjectURL(blob);
+                const link = document.createElement("a");
+                link.href = url;
+                link.download = resultFileName;
+                link.click();
+            };
+            reader.readAsText(file);
+        }
+    </script>
 </body>
+
 </html>
