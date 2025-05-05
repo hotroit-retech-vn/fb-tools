@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Thêm Prefix & Suffix</title>
+</head>
+<body>
+  <h2>Thêm tiền tố (prefix) và hậu tố (suffix) vào từng dòng</h2>
+
+  <label>Chọn file .txt:</label><br>
+  <input type="file" id="fileInput"><br><br>
+
+  <label>Tiền tố (Prefix):</label><br>
+  <input type="text" id="prefix" value="facebook.com/"><br><br>
+
+  <label>Hậu tố (Suffix):</label><br>
+  <input type="text" id="suffix" value=""><br><br>
+
+  <button onclick="processFile()">Tạo file kết quả</button>
+
+  <script>
+    function processFile() {
+      const file = document.getElementById('fileInput').files[0];
+      const prefix = document.getElementById('prefix').value;
+      const suffix = document.getElementById('suffix').value;
+
+      if (!file) {
+        alert("Hãy chọn file .txt trước.");
+        return;
+      }
+
+      const reader = new FileReader();
+      reader.onload = function(event) {
+        const lines = event.target.result.split('\n');
+        const modifiedLines = lines.map(line => {
+          const trimmed = line.trim();
+          return trimmed ? `${prefix}${trimmed}${suffix}` : '';
+        });
+        const result = modifiedLines.join('\n');
+
+        // Tạo file mới để tải xuống
+        const blob = new Blob([result], { type: 'text/plain' });
+        const url = URL.createObjectURL(blob);
+        const link = document.createElement("a");
+        link.href = url;
+        link.download = "output.txt";
+        link.click();
+      };
+      reader.readAsText(file);
+    }
+  </script>
+</body>
+</html>
