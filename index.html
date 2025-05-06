@@ -14,9 +14,9 @@
             <h3 class="text-2xl font-bold text-gray-800 text-center">ADD TEXT IN LINE</h2>
 
             <div class="flex flex-col">
-                <label for="fileInput" class="text-lg text-gray-600 mb-2">Chọn file .txt:</label>
-                <input type="file" id="fileInput" accept=".txt" onchange="previewFile()"
-                    class="p-2 border border-gray-300 rounded-lg bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500">
+                <label for="contentInput" class="text-lg text-gray-600 mb-2">Dán nội dung vào đây:</label>
+                <textarea id="contentInput" rows="5" oninput="updatePreview()"
+                    class="p-2 border border-gray-300 rounded-lg bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500"></textarea>
             </div>
 
             <div class="flex flex-col">
@@ -31,19 +31,14 @@
                     class="p-2 border border-gray-300 rounded-lg bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500">
             </div>
 
-            <div class="flex flex-col">
-                <label for="resultFileName" class="text-lg text-gray-600 mb-2">Tên file kết quả:</label>
-                <input type="text" id="resultFileName" value="output"
-                    class="p-2 border border-gray-300 rounded-lg bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500">
-            </div>
-
-            <button onclick="processFile()"
-                class="w-full p-4 bg-green-500 text-white text-xl rounded-lg hover:bg-green-600 active:bg-green-700 focus:outline-none focus:ring-2 focus:ring-green-500">
-                Tạo file kết quả
-            </button>
-
-            <div class="w-full h-60 border border-gray-300 rounded-lg p-4 bg-gray-50 overflow-y-auto mt-6">
-                <pre id="filePreview" class="text-gray-500">No file selected</pre>
+            <div class="w-full border border-gray-300 rounded-lg p-4 bg-gray-50 mt-4">
+                <div class="flex justify-between items-center mb-2">
+                    <label class="text-lg text-gray-600">Kết quả:</label>
+                    <button onclick="copyResult()" class="px-3 py-1 bg-blue-500 text-white rounded hover:bg-blue-600 focus:outline-none">
+                        Copy
+                    </button>
+                </div>
+                <pre id="filePreview" class="text-gray-500 bg-white p-2 rounded overflow-auto max-h-60">No content</pre>
             </div>
         </div>
     </div>
@@ -53,34 +48,17 @@
     </div>
 
     <script>
-        let fileContent = "";
-
-        function previewFile() {
-            const file = document.getElementById('fileInput').files[0];
-            const previewContainer = document.getElementById('filePreview');
-
-            if (!file) {
-                previewContainer.textContent = "No file selected";
-                return;
-            }
-
-            const reader = new FileReader();
-            reader.onload = function (event) {
-                fileContent = event.target.result;
-                updatePreview(); // Update preview with file content
-            };
-            reader.readAsText(file);
-        }
-
         function updatePreview() {
+            const content = document.getElementById('contentInput').value;
             const prefix = document.getElementById('prefix').value;
             const suffix = document.getElementById('suffix').value;
 
-            if (!fileContent) {
+            if (!content) {
+                document.getElementById('filePreview').textContent = "No content";
                 return;
             }
 
-            const lines = fileContent.split('\n');
+            const lines = content.split('\n');
             const modifiedLines = lines.map(line => {
                 const trimmed = line.trim();
                 return trimmed ? `${prefix}${trimmed}${suffix}` : '';
@@ -90,41 +68,23 @@
             document.getElementById('filePreview').textContent = result;
         }
 
-        function processFile() {
-            const file = document.getElementById('fileInput').files[0];
-            const prefix = document.getElementById('prefix').value;
-            const suffix = document.getElementById('suffix').value;
-            let resultFileName = document.getElementById('resultFileName').value.trim();
-
-            if (!resultFileName.endsWith('.txt')) {
-                resultFileName += '.txt';
-            }
-
-            if (!file) {
-                alert("Hãy chọn file .txt trước.");
+        function copyResult() {
+            const resultText = document.getElementById('filePreview').textContent;
+            
+            if (resultText === "No content") {
+                alert("Không có nội dung để copy");
                 return;
             }
-
-            const reader = new FileReader();
-            reader.onload = function (event) {
-                const lines = event.target.result.split('\n');
-                const modifiedLines = lines.map(line => {
-                    const trimmed = line.trim();
-                    return trimmed ? `${prefix}${trimmed}${suffix}` : '';
+            
+            navigator.clipboard.writeText(resultText)
+                .then(() => {
+                    alert("Đã copy nội dung vào clipboard!");
+                })
+                .catch(err => {
+                    console.error('Failed to copy: ', err);
+                    alert("Copy thất bại, vui lòng thử lại");
                 });
-                const result = modifiedLines.join('\n');
-
-                // Tạo file mới để tải xuống
-                const blob = new Blob([result], { type: 'text/plain' });
-                const url = URL.createObjectURL(blob);
-                const link = document.createElement("a");
-                link.href = url;
-                link.download = resultFileName;
-                link.click();
-            };
-            reader.readAsText(file);
         }
     </script>
 </body>
-
 </html>
