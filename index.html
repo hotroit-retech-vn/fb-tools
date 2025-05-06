@@ -11,12 +11,30 @@
 
     <div class="flex justify-center items-center">
         <div class="bg-white p-4 rounded-lg shadow-xl mt-6 w-full max-w-lg flex flex-col gap-4">
-            <h3 class="text-2xl font-bold text-gray-800 text-center">ADD TEXT IN LINE</h2>
+            <h3 class="text-2xl font-bold text-gray-800 text-center">ADD TEXT IN LINE</h3>
 
-            <div class="flex flex-col">
+            <!-- Tab selection -->
+            <div class="flex border-b border-gray-200">
+                <button id="pasteTab" class="flex-1 py-2 px-4 font-medium text-center border-b-2 border-blue-500 text-blue-600 focus:outline-none">
+                    Nhập trực tiếp
+                </button>
+                <button id="fileTab" class="flex-1 py-2 px-4 font-medium text-center border-b-2 border-transparent text-gray-500 hover:text-gray-700 focus:outline-none">
+                    Upload file
+                </button>
+            </div>
+
+            <!-- Paste content section -->
+            <div id="pasteSection" class="flex flex-col">
                 <label for="contentInput" class="text-lg text-gray-600 mb-2">Dán nội dung vào đây:</label>
                 <textarea id="contentInput" rows="5" oninput="updatePreview()"
                     class="p-2 border border-gray-300 rounded-lg bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500"></textarea>
+            </div>
+
+            <!-- File upload section (hidden by default) -->
+            <div id="fileSection" class="flex flex-col hidden">
+                <label for="fileInput" class="text-lg text-gray-600 mb-2">Chọn file .txt:</label>
+                <input type="file" id="fileInput" accept=".txt" onchange="handleFileUpload()"
+                    class="p-2 border border-gray-300 rounded-lg bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500">
             </div>
 
             <div class="flex flex-col">
@@ -48,17 +66,63 @@
     </div>
 
     <script>
+        let currentContent = "";
+
+        // Tab switching
+        document.getElementById('pasteTab').addEventListener('click', function() {
+            this.classList.add('border-blue-500', 'text-blue-600');
+            this.classList.remove('border-transparent', 'text-gray-500');
+            document.getElementById('fileTab').classList.add('border-transparent', 'text-gray-500');
+            document.getElementById('fileTab').classList.remove('border-blue-500', 'text-blue-600');
+            document.getElementById('pasteSection').classList.remove('hidden');
+            document.getElementById('fileSection').classList.add('hidden');
+            updatePreview();
+        });
+
+        document.getElementById('fileTab').addEventListener('click', function() {
+            this.classList.add('border-blue-500', 'text-blue-600');
+            this.classList.remove('border-transparent', 'text-gray-500');
+            document.getElementById('pasteTab').classList.add('border-transparent', 'text-gray-500');
+            document.getElementById('pasteTab').classList.remove('border-blue-500', 'text-blue-600');
+            document.getElementById('fileSection').classList.remove('hidden');
+            document.getElementById('pasteSection').classList.add('hidden');
+            updatePreview();
+        });
+
+        function handleFileUpload() {
+            const file = document.getElementById('fileInput').files[0];
+            if (!file) {
+                currentContent = "";
+                updatePreview();
+                return;
+            }
+
+            const reader = new FileReader();
+            reader.onload = function(event) {
+                currentContent = event.target.result;
+                updatePreview();
+            };
+            reader.readAsText(file);
+        }
+
         function updatePreview() {
-            const content = document.getElementById('contentInput').value;
             const prefix = document.getElementById('prefix').value;
             const suffix = document.getElementById('suffix').value;
-
-            if (!content) {
+            
+            // Get content based on active tab
+            if (document.getElementById('pasteTab').classList.contains('text-blue-600')) {
+                currentContent = document.getElementById('contentInput').value;
+            } else if (!currentContent) {
                 document.getElementById('filePreview').textContent = "No content";
                 return;
             }
 
-            const lines = content.split('\n');
+            if (!currentContent) {
+                document.getElementById('filePreview').textContent = "No content";
+                return;
+            }
+
+            const lines = currentContent.split('\n');
             const modifiedLines = lines.map(line => {
                 const trimmed = line.trim();
                 return trimmed ? `${prefix}${trimmed}${suffix}` : '';
