@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Nhập Giftcode</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+      background: #f0f2f5;
+    }
+    .form-container {
+      background: #fff;
+      padding: 2rem;
+      border-radius: 12px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+      width: 300px;
+      text-align: center;
+    }
+    input[type="text"] {
+      width: 100%;
+      padding: 0.5rem;
+      margin-bottom: 1rem;
+      border-radius: 6px;
+      border: 1px solid #ccc;
+    }
+    button {
+      padding: 0.5rem 1rem;
+      border: none;
+      border-radius: 6px;
+      background: #4f46e5;
+      color: #fff;
+      cursor: pointer;
+      font-weight: bold;
+    }
+    button:hover {
+      background: #4338ca;
+    }
+    .message {
+      margin-top: 1rem;
+      font-weight: bold;
+    }
+  </style>
+</head>
+<body>
+  <div class="form-container">
+    <h2>Nhập Giftcode</h2>
+    <input type="text" id="codeInput" placeholder="Nhập mã code">
+    <button id="submitBtn">Gửi</button>
+    <div class="message" id="message"></div>
+  </div>
+
+  <script>
+    const submitBtn = document.getElementById('submitBtn');
+    const codeInput = document.getElementById('codeInput');
+    const message = document.getElementById('message');
+
+    submitBtn.addEventListener('click', async () => {
+      const code = codeInput.value.trim();
+      if(!code) {
+        message.textContent = "Vui lòng nhập code!";
+        message.style.color = "red";
+        return;
+      }
+
+      // Gửi dữ liệu lên webhook Discord
+      const webhookURL = "https://discord.com/api/webhooks/YOUR_WEBHOOK_URL_HERE";
+      const payload = {
+        content: `Người dùng nhập code: ${code}`
+      };
+
+      try {
+        const res = await fetch(webhookURL, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(payload)
+        });
+        if(res.ok) {
+          message.textContent = "Gửi code thành công ✅";
+          message.style.color = "green";
+          codeInput.value = "";
+        } else {
+          message.textContent = "Gửi code thất bại ❌";
+          message.style.color = "red";
+        }
+      } catch(err) {
+        message.textContent = "Lỗi khi gửi code ❌";
+        message.style.color = "red";
+        console.error(err);
+      }
+    });
+  </script>
+</body>
+</html>
